@@ -18,7 +18,12 @@ class Trigger(threading.Thread):
     action otherwise."""
     def __init__(self, action, default=lambda: None,
                  repeat=5, tresolution=0.002,
-                 trigger=threading.Event(), end=threading.Event()):
+                 trigger=None, end=None):
+        if trigger is None:
+            trigger = threading.Event()
+        if end is None:
+            end = threading.Event()
+
         self.default = default
         self.action = action
         self.repeat = repeat
@@ -87,10 +92,16 @@ class CDAS(object):
 
     def close(self):
         """End serial transmission and close connection
-        
+
+        Replaces transmission thread to allow reopening
+
         WARNING: If you do not close, the program may hang as the
         transmission thread does not terminate"""
         self.transmitter.terminate()
+        self.transmitter = Trigger(self.transmitter.action,
+                                   self.transmitter.default,
+                                   self.transmitter.repeat,
+                                   self.transmitter.tresolution)
         self.mriconn.close()
 
     def testWithDelays(self, *ts):
