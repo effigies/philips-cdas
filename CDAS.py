@@ -17,8 +17,7 @@ class Trigger(threading.Thread):
     """Perform action upon trigger event, optionally performing a default
     action otherwise."""
     def __init__(self, action, default=lambda: None,
-                 repeat=5, tresolution=0.002,
-                 trigger=None, end=None):
+                 repeat=5, tresolution=0.002, trigger=None, end=None):
         if trigger is None:
             trigger = threading.Event()
         if end is None:
@@ -39,11 +38,8 @@ class Trigger(threading.Thread):
         while not self.end.isSet():
             if self.trigger.isSet():
                 self.action()
-                if not counter:
-                    print "ON!"
                 counter += 1
                 if counter > self.repeat:
-                    print "OFF!"
                     self.trigger.clear()
                     counter = 0
             else:
@@ -104,9 +100,9 @@ class CDAS(object):
                                    self.transmitter.tresolution)
         self.mriconn.close()
 
-    def testWithDelays(self, *ts):
+    def testWithDelays(self, *delays):
         """Test timing of trigger with list of delays"""
         self.trigger()
-        for t in ts:
-            time.sleep(t)
+        for delay in delays:
+            time.sleep(delay)
             self.trigger()
