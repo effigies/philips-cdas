@@ -35,6 +35,7 @@ class Trigger(threading.Thread):
         """Loop until signaled to end, performing default except when triggered
         to perform action"""
         counter = 0
+        nextWake = time.time() + self.tresolution
         while not self.end.isSet():
             if self.trigger.isSet():
                 self.action()
@@ -44,7 +45,11 @@ class Trigger(threading.Thread):
                     counter = 0
             else:
                 self.default()
-            time.sleep(self.tresolution)
+
+            # Allow sleep time to vary to compensate for execution time
+            # vagaries. Waking time should be evenly spaced.
+            time.sleep(nextWake - time.time())
+            nextWake += self.tresolution
 
     def terminate(self):
         """End thread main loop"""
