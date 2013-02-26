@@ -8,6 +8,7 @@ Usage:
 >>> cdas.close()
 """
 
+import sys
 import time
 import serial
 import threading
@@ -38,6 +39,8 @@ class Trigger(threading.Thread):
         nextWake = time.time() + self.tresolution
         while not self.end.isSet():
             if self.trigger.isSet():
+                if counter == 0:
+                    print "SCAN"
                 self.action()
                 counter += 1
                 if counter > self.repeat:
@@ -58,7 +61,7 @@ class Trigger(threading.Thread):
 
 class CDAS(object):
     """Interface with Philips MRI scanner over serial, using respiration
-    trigger. Send 0V ever 2ms; on trigger send 0.01ms of 5V signal.
+    trigger. Send 0V every 2ms; on trigger send 10ms of 5V signal.
     """
     def __init__(self, mriconn=None, baseline=None, action=None):
         if mriconn is None:
@@ -111,3 +114,26 @@ class CDAS(object):
         for delay in delays:
             time.sleep(delay)
             self.trigger()
+
+def test(argv):
+    if len(argv) > 1:
+        tty = argv[1]
+    else:
+        tty = '/dev/ttyUSB0'
+    if len(argv) > 2:
+        delays = map(int, argv[2:])
+    else:
+        delays = [2] * 100
+
+    mriconn = serial.Serial(port=tty, baudrate=115200, stopbits=1,
+                            parity=serial.PARITY_NONE, xonxoff=True)
+
+    cdas = CDAS(mriconn)
+    cdas.open()
+    try:
+        cdas.testWithDelays(*delays)
+    except KeyboardInterrupt:
+        cdas.close()
+
+if __name__ == '__main__':
+    sys.exit(test(sys.argv))
