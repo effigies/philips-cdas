@@ -108,20 +108,18 @@ class CDAS(object):
                                    self.transmitter.tresolution)
         self.mriconn.close()
 
-    def testWithDelays(self, *delays):
+    def testWithDelays(self, delays):
         """Test timing of trigger with list of delays"""
         self.trigger()
         for delay in delays:
             time.sleep(delay)
             self.trigger()
 
-def test(argv):
-    if len(argv) > 1:
-        tty = argv[1]
-    else:
-        tty = '/dev/ttyUSB0'
-    if len(argv) > 2:
-        delays = map(int, argv[2:])
+
+def test(tty='/dev/ttyUSB0', *delays):
+    """Send 10ms 5V pulse every 2 seconds or with manually specified delays"""
+    if delays:
+        delays = map(int, delays)
     else:
         delays = [2] * 100
 
@@ -131,9 +129,11 @@ def test(argv):
     cdas = CDAS(mriconn)
     cdas.open()
     try:
-        cdas.testWithDelays(*delays)
+        cdas.testWithDelays(delays)
     except KeyboardInterrupt:
-        cdas.close()
+        pass
+
+    cdas.close()
 
 if __name__ == '__main__':
-    sys.exit(test(sys.argv))
+    sys.exit(test(*sys.argv[1:]))
