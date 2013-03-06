@@ -43,7 +43,7 @@ described presently, and `CKSUM` is simply bitwise xor of all bytes in the
 The first field is an `ID` field, indicating which of the four strings is
 being sent. `Vx`, `Vy`, `Vz`, `PP`, and `RESP` are voltage fields. Each byte
 must have a 1 in their most significant bit, leaving 14 bits of flexibility.
-A 0V signal is thus `'\x80\x80'`, and &pm;5V are `'\xbf\xff'` and `'\xff\xff'`,
+A 0V signal is thus `'\x80\x80'`, and ±5V are `'\xbf\xff'` and `'\xff\xff'`,
 respectively.
 
 `STRING` is a variable-length status message, which appears to take the form
