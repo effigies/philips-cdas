@@ -24,7 +24,7 @@ import threading
 # the voltage fields Vx, Vy, PP and RESP begin with 1, allowing 14 total bytes
 # of voltage information.
 SOM = '\x02'        # Start of message
-EOM = '\x0D'        # End of message
+EOM = '\x0d'        # End of message
 
 ID = '\x82'         # ID = 0x82 indicates Vx, Vy, PP and RESP present
 ZEROV = '\x80\x80'  # 0V    0b1000 0000 1000 0000
