@@ -11,7 +11,39 @@ Usage:
 import sys
 import time
 import serial
+import operator
 import threading
+
+# We craft "physiology data packets" which contain the voltage we would
+# like to send. The structure of the packets is as follows:
+#
+# [SOM][                     DATA                     ][CKSUM][EOM]
+#      [ID][Vx][Vx][Vy][Vy][PP][PP][RESP][RESP][STRING]
+#
+# Each field, with the exception of [STRING], is a single byte. Each byte of
+# the voltage fields Vx, Vy, PP and RESP begin with 1, allowing 14 total bytes
+# of voltage information.
+SOM = '\x02'        # Start of message
+EOM = '\x0D'        # End of message
+
+ID = '\x82'         # ID = 0x82 indicates Vx, Vy, PP and RESP present
+ZEROV = '\x80\x80'  # 0V    0b1000 0000 1000 0000
+FIVEV = '\xbf\xff'  # 5V    0b1011 1111 1111 1111
+RESPA = 'SR03\n'    # R means RESP, 3 means active, \n is end-of-string marker
+                    # S perhaps is start, 0 is unexplained
+
+# Construct packet contents (14 bytes)
+# Use ZEROV for Vx, Vy, PP
+ZERODATA = ID + 3 * ZEROV + ZEROV + RESPA
+FIVEDATA = ID + 3 * ZEROV + FIVEV + RESPA
+
+# Checksum is the bitwise xor of DATA strings
+CKSUMZERO = chr(reduce(operator.xor, map(ord, ZERODATA)))   # '\x8a'
+CKSUMFIVE = chr(reduce(operator.xor, map(ord, FIVEDATA)))   # '\xca'
+
+# Construct packets
+ZEROPACKET = SOM + ZERODATA + CKSUMZERO + EOM
+FIVEPACKET = SOM + FIVEDATA + CKSUMFIVE + EOM
 
 
 class Trigger(threading.Thread):
@@ -71,13 +103,9 @@ class CDAS(object):
                                     stopbits=1,
                                     xonxoff=True)
         if baseline is None:
-            baseline = lambda: mriconn.write(
-                ''.join(map(chr, [2, 130, 128, 128, 128, 128, 128, 128, 128,
-                                  128, 83, 82, 48, 51, 10, 138, 13])))
+            baseline = lambda: mriconn.write(ZEROPACKET)
         if action is None:
-            action = lambda: mriconn.write(
-                ''.join(map(chr, [2, 130, 128, 128, 128, 128, 128, 128, 191,
-                                  255, 83, 82, 48, 51, 10, 202, 13])))
+            action = lambda: mriconn.write(FIVEPACKET)
 
         self.mriconn = mriconn
 
