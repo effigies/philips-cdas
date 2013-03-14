@@ -1,8 +1,8 @@
 philips-cdas
 ============
 
-Python interface to Philips MRI scanner using respiration trigger to
-manually or programmatically trigger scans
+Python interface to Philips MRI scanner using the peripheral physiology
+unit (PPU) signal to manually or programmatically trigger scans
 
 ## Low-level Documentation
 In order to construct this, we had access to a pretty verbose MATLAB file,
@@ -50,7 +50,7 @@ respectively.
 `'S[SIGNAL]0[MODE]\n'`. `SIGNAL` is one of `V`, `S`, `R`, `C` and `M`,
 corresponding to the `V{x,y,z}`, `PP`, `RESP` signals, as well as nurse call
 and `MEB`. `MODE` can be 0 for normal, 1 for connected or 3 for active. We
-strictly use the string `'SR03\n'`.
+strictly use the string `'SS03\n'`.
 
 #### Packets
 In this signal, we have two packets, corresponding to rest and triggering.
@@ -59,11 +59,11 @@ shown for field alignment, and should not appear in a packet):
 
     [SOM][                      DATA                      ][CKSUM][EOM]
          [ ID ][Vx][Vx][Vy][Vy][PP][PP][RESP][RESP][STRING]
-    \x02  \x82 \x80\x80\x80\x80\x80\x80 \x80  \x80  SR03\n  \x8a  \x0d
+    \x02  \x82 \x80\x80\x80\x80\x80\x80 \x80  \x80  SS03\n  \xcb  \x0d
 
-The triggering packet sends 5V along the RESP channel, and looks like:
+The triggering packet sends 5V along the PPU channel, and looks like:
 
     [SOM][                      DATA                      ][CKSUM][EOM]
          [ ID ][Vx][Vx][Vy][Vy][PP][PP][RESP][RESP][STRING]
-    \x02  \x82 \x80\x80\x80\x80\x80\x80 \xbf  \xff  SR03\n  \x8a  \x0d
+    \x02  \x82 \x80\x80\x80\x80\xbf\xff \x80  \x80  SS03\n  \x8b  \x0d
     
