@@ -43,8 +43,12 @@ def toByteString(val):
 def checkSum(data):
     """Bitwise XOR all bytes in data"""
     cksum = reduce(operator.xor, map(ord, data))
+
+    # Special characters (SOM, EOM, XON, XOFF) are invalid, so take one's
+    # complement
     if cksum in (0x02, 0x0d, 0x11, 0x13):
         cksum = ~cksum & 0xff
+
     return chr(cksum)
 
 
@@ -100,7 +104,7 @@ def constructPacket(ptype='\x82', ecgx=0, ecgy=0, ecgz=0, ppu=0, resp=0,
     return SOM + data + checkSum(data) + EOM
 
 ZEROPACKET = constructPacket()
-MAXPACKET = constructPacket(ppu=INT14_MAX)
+MAXPPUPACKET = constructPacket(ppu=INT14_MAX)
 
 
 class Trigger(threading.Thread):
@@ -162,7 +166,7 @@ class CDAS(object):
         if baseline is None:
             baseline = lambda: mriconn.write(ZEROPACKET)
         if action is None:
-            action = lambda: mriconn.write(MAXPACKET)
+            action = lambda: mriconn.write(MAXPPUPACKET)
 
         self.mriconn = mriconn
 
