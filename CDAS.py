@@ -2,11 +2,21 @@
 """Interface with Philips MRI scanner through the PPU trigger
 
 Usage:
+
 >>> cdas = CDAS()
 >>> cdas.open()
 >>> cdas.trigger()
 >>> cdas.close()
+
+On open, the CDAS class begins sending a stream of 0V values to the
+PPU channel. When triggered, values of +5V are sent for 10ms, triggering
+a volume acquisition.
+
+Temporal resolution is set to 2ms.
 """
+
+__author__ = 'Christopher J. Markiewicz <effigies@bu.edu>'
+__version__ = '0.1'
 
 import sys
 import time
@@ -153,8 +163,8 @@ class Trigger(threading.Thread):
 
 
 class CDAS(object):
-    """Interface with Philips MRI scanner over serial, using respiration
-    trigger. Send 0V every 2ms; on trigger send 10ms of 5V signal.
+    """Interface with Philips MRI scanner over serial connection, using
+    PPU trigger. Send 0V every 2ms; on trigger send 10ms of 5V signal.
     """
     def __init__(self, mriconn=None, baseline=None, action=None):
         if mriconn is None:
