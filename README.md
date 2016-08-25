@@ -67,3 +67,9 @@ The triggering packet sends 5V along the PPU channel, and looks like:
          [ ID ][Vx][Vx][Vy][Vy][PP][PP][RESP][RESP][STRING]
     \x02  \x82 \x80\x80\x80\x80\xbf\xff \x80  \x80  SS03\n  \x8b  \x0d
     
+## Citing
+
+If you use this to create a publishable work, please cite:
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.49853.svg)](
+    https://dx.doi.org/10.5281/zenodo.49853)
+
